@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.10)
+project(BaBP)
+include(CTest)
+
+set(COMMON_SOURCES)
+
+set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address,undefined -Wall")
+set(CMAKE_CXX_FLAGS "-std=c++17")
+
+add_executable(
+    BaBP ${COMMON_SOURCES} src/main/platform.cpp
+)
+
+target_include_directories(BaBP
+    PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/include
+    ${PROJECT_SOURCE_DIR}/src/libs
+)
