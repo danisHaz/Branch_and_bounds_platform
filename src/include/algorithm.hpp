@@ -4,6 +4,7 @@
 #include <optional>
 #include <variant>
 #include <vector>
+#include <utility>
 
 namespace babp {
 namespace core {
@@ -27,11 +28,8 @@ namespace structural {
         T value;
         std::string name, key;
 
-        Variable(std::string const& name, std::string const& key): value { nullptr }, name { name }, key { key } {}
-
-        Variable(T const& value, std::string const& name, std::string const& key): value { value }, name { name }, key { key } {}
-
-        Variable(T &&value, std::string &&name, std::string &&key): value { value }, name { name }, key { key } {}
+        Variable(std::string const& name, std::string const& key): name { name }, key { key } {}
+        
 
         T compute() const override {
             return value;
@@ -39,7 +37,7 @@ namespace structural {
     };
 
     enum class OperationType {
-        PLUS, MINUS, MULT, DIV, SCALAR
+        PLUS, MINUS, MULT, DIV, SCALAR, GROUP_START, GROUP_END
     };
 
     template < typename data_type >
@@ -49,27 +47,33 @@ namespace structural {
         OperationType operation;
 
         data_type computePlus() const {
-            std::assert(arguments.size() == 2);
+            assert(arguments.size() == 2);
             return arguments[0].compute() + arguments[1].compute();
         }
         
         data_type computeMinus() const {
-            std::assert(arguments.size() == 2);
+            assert(arguments.size() == 2);
             return arguments[0].compute() - arguments[1].compute();
         }
 
         data_type computeMult() const {
-            std::assert(arguments.size() == 2);
+            assert(arguments.size() == 2);
             return arguments[0].compute() * arguments[1].compute();
         }
 
         data_type computeDiv() const {
-            std::assert(arguments.size() == 2);
-            std::assert(arguments[1] != 0);
+            assert(arguments.size() == 2);
+            assert(arguments[1] != 0);
+            return arguments[0].compute() / arguments[1].compute();
+        }
+
+        data_type computeUnaryMinus() const {
+            assert(arguments.size() == 1);
+            return -arguments[0].compute();
         }
 
         public:
-        StructuralTreeNode(OperationType operation, FunctionalComputable... args): arguments { args }, operation { operation } {}
+        StructuralTreeNode(OperationType operation, FunctionalComputable... args): arguments { args... }, operation { operation } {}
 
         data_type compute() const override {
             if (operation == OperationType::PLUS) {

@@ -1,17 +1,10 @@
+#include "inflater.hpp"
 #include <iostream>
-#include <string>
-// #include <Eigen/Dense>
-// #include "solution.hpp"
-#include <algorithm.hpp>
-
-std::string get_string_view() {
-    std::string kek { "meme" };
-
-    return std::move(kek);
-}
 
 int main() {
-    
-    
+
+    babp::core::Inflater inflater;
+    std::cout << inflater.inflate("-a * (b + c)");
+
     return 0;
 }
