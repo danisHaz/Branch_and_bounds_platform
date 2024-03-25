@@ -1,10 +1,11 @@
 #include "inflater.hpp"
+
 #include <iostream>
+#include <string>
+#include <variant>
+#include <vector>
 
-int main() {
-
-    babp::core::Inflater inflater;
-    std::cout << inflater.inflate("-a * (b + c)");
+int main() {    
 
     return 0;
 }

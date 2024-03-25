@@ -2,29 +2,22 @@
 
 #include <utility>
 #include <string>
-#include <queue>
 #include <vector>
+#include <optional>
+#include <climits>
+#include <iostream>
 
 #include "algorithm.hpp"
 
 namespace babp {
 namespace core {
 
-	static char const WHITESPACE = ' ';
-	static char const COMMA = ',';
-	static char const MINUS = '-';
-	static char const PLUS = '+';
-	static char const MULT = '*';
-    static char const DIV = '/';
-	static char const CIRCLE_PARENTH_OPEN = '(';
-	static char const CIRCLE_PARENTH_CLOSE = ')';
-	static char const ANGLE_PARENTH_OPEN = '<';
-	static char const ANGLE_PARENTH_CLOSE = '>';
-
 	struct Group {
-		int const start, end;
+		std::size_t const start, end;
 
-		Group(int start, int end): start { start }, end { end } {}
+		Group(std::size_t const start, std::size_t const end): start { start }, end { end } {}
+		Group(std::optional<std::size_t> start, std::optional<std::size_t> end): start { start.value_or(0) }, end { end.value_or(INT_MAX) } {}
+		Group(): start { 0 }, end { INT_MAX } {}
 	};
 
 	enum class PointerType {
@@ -32,24 +25,42 @@ namespace core {
 	};
 
 	struct Pointer {
-		const int position;
+		const std::size_t position;
 		const PointerType type;
 
-		Pointer(int position, PointerType type): position { position }, type { type } {}
+		Pointer(std::size_t position, PointerType type): position { position }, type { type } {}
     };
+
+	template < typename T >
+	struct TypeHolder {
+
+		T construct() {
+			return T { };
+		}
+	};
+
+	using Statement = std::variant<std::string, structural::OperationType>;
 
 	class Inflater {
 
-		void filterSpaces(std::string &fStr) const;
-		std::vector<::Group> getGroupsList(std::string const& fStr) const;
-		std::queue<::structural::OperationType> parseGroupToOperations(std::string const& fStr, int pos) const;
+		void pushVariableName(
+			std::string const& fStr,
+			Group const nameRange,
+			std::vector<Statement>& sequence
+		) const ;
 
-		std::queue<::structural::OperationType> getOperationList(std::string const& fStr) const;
+		std::optional<structural::OperationType> getOperationOrNull(char const c) const;
+		std::string filterSpaces(std::string const& fStr) const;
+		void filterSpaces(std::string &fStr) const;
+		std::vector<Group> getGroupsList(std::string const& fStr) const;
+		std::vector<Statement> parseGroupToOperations(std::string const& fStr, Group const& group) const;
+		std::vector<Statement> getOperationList(std::string const& fStr) const;
 
 		public:
-		void inflate(std::string &functionStr) const;
+		std::vector<Statement> inflate(std::string const& functionStr) const;
+		std::vector<Statement> inflate(std::string &&functionStr) const;
 
-		std::string inflate(std::string &&functionStr) const;
+		void printStatement(std::ostream &output, Statement const& statement) const;
 	};
 
 } // namespace core

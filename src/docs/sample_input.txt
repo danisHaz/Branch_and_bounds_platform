@@ -1,0 +1,6 @@
+-a * (b + c) + <Q, v>
+a: int
+b: double
+c: double
+Q: Matrix<8, any>
+v: Matrix<any>

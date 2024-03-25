@@ -5,31 +5,28 @@
 #include <variant>
 #include <vector>
 #include <utility>
+#include <map>
 
 namespace babp {
 namespace core {
-
-    class Function {
-
-        
-    };
 
 namespace structural {
 
     template < typename ComputationResult >
     class FunctionalComputable {
-        
+
         virtual ComputationResult compute() const = 0;
     };
 
     template < typename T >
     struct Variable {
 
-        T value;
+        std::optional<T> value;
         std::string name, key;
 
         Variable(std::string const& name, std::string const& key): name { name }, key { key } {}
-        
+        Variable(T const& value, std::string const& name, std::string const& key): name { name }, key { key }, value { value } {}
+        Variable(T &&value, std::string &&name, std::string &&key): name { name }, key { key }, value { value } {}
 
         T compute() const override {
             return value;
@@ -37,7 +34,19 @@ namespace structural {
     };
 
     enum class OperationType {
-        PLUS, MINUS, MULT, DIV, SCALAR, GROUP_START, GROUP_END
+        PLUS, MINUS, MULT, DIV, SCALAR_START, SCALAR_DIVIDER, SCALAR_END, GROUP_START, GROUP_END
+    };
+
+    static std::map<OperationType, std::string> meme { 
+        { OperationType::PLUS, "PLUS" },
+        { OperationType::MINUS, "MINUS" },
+        { OperationType::MULT, "MULT" },
+        { OperationType::DIV, "DIV" },
+        { OperationType::SCALAR_START, "SCALAR_START" },
+        { OperationType::SCALAR_DIVIDER, "SCALAR_DIVIDER" },
+        { OperationType::SCALAR_END, "SCALAR_END" },
+        { OperationType::GROUP_START, "GROUP_START" },
+        { OperationType::GROUP_END, "GROUP_END" },
     };
 
     template < typename data_type >

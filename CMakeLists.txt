@@ -4,7 +4,7 @@ include(CTest)
 
 set(COMMON_SOURCES)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address,undefined -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address,undefined -Wall -Wextra")
 set(CMAKE_CXX_FLAGS "-std=c++17")
 
 add_executable(
