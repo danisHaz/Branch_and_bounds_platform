@@ -3,6 +3,7 @@
 namespace babp {
 namespace core {
 
+	// operations
 	static char const WHITESPACE = ' ';
 	static char const COMMA = ',';
 	static char const MINUS = '-';
@@ -15,6 +16,14 @@ namespace core {
 	static char const ANGLE_BRACKET_CLOSE = '>';
 
 	static char const VARIABLE_NAME_SIGN = '$';
+
+	// declared types
+	static char const* INT_T = "Int";
+	static char const* DOUBLE_T = "Double";
+	static char const* MATRIX_T = "Matrix";
+	static char const* VECTOR_T = "Vector";
+
+	static char const SEMICOLON = ':';
 
 } // namespace core
 } // namespace babp

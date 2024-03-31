@@ -1,8 +1,10 @@
 #include <utility>
 #include <stack>
 #include <cassert>
+#include <unordered_map>
 
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "inflater.hpp"
 #include "core_constants.hpp"
@@ -144,4 +146,23 @@ void Inflater::printStatement(std::ostream &output, Statement const& statement) 
             output << babp::core::structural::meme[st] << " ";
         }
     }, statement);
+}
+
+std::unordered_map<std::string, std::string> ArgumentInflater::getStringedTypes(std::vector<std::string> types) const {
+    std::vector<std::vector<std::string>> splitted_types;
+    std::size_t ind = 0;
+    std::for_each(types.begin(), types.end(), [&ind, &splitted_types](auto &&type) {
+        boost::split(splitted_types[ind], type, [](char const& ch) { return ch == SEMICOLON ? true : false; });
+    });
+
+    std::unordered_map<std::string, std::string> result;
+
+    std::for_each(splitted_types.begin(), splitted_types.end(), [&result](auto &&varNameType) {
+        assert(varNameType.size() == 2);
+        assert(result.count(varNameType[0]) == 0);
+
+        result[varNameType[0]] = varNameType[1]; 
+    });
+
+    return result;
 }

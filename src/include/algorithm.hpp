@@ -7,6 +7,10 @@
 #include <utility>
 #include <map>
 
+#include <Dense>
+
+#include "type_traits.hpp"
+
 namespace babp {
 namespace core {
 
@@ -18,17 +22,40 @@ namespace structural {
         virtual ComputationResult compute() const = 0;
     };
 
-    template < typename T >
-    struct Variable {
+    struct Variable : FunctionalComputable<Var_t> {
 
-        std::optional<T> value;
+        private:
+        Var_t value;
         std::string name, key;
 
-        Variable(std::string const& name, std::string const& key): name { name }, key { key } {}
-        Variable(T const& value, std::string const& name, std::string const& key): name { name }, key { key }, value { value } {}
-        Variable(T &&value, std::string &&name, std::string &&key): name { name }, key { key }, value { value } {}
+        public:
+        Variable(
+            Var_t &&value,
+            std::string name,
+            std::string key
+        ): 
+            value { std::move(value) },
+            name { std::move(name) },
+            key { std::move(key) } {}
 
-        T compute() const override {
+        Variable(
+            Var_t const& value,
+            std::string name,
+            std::string key
+        ): 
+            value { value },
+            name { std::move(name) },
+            key { std::move(key) } {}
+
+        void setValue(Var_t const& newValue) {
+            value = newValue;
+        }
+
+        void setValue(Var_t &&newValue) {
+            value = newValue;
+        }
+
+        Var_t compute() const override {
             return value;
         }
     };
@@ -37,7 +64,7 @@ namespace structural {
         PLUS, MINUS, MULT, DIV, SCALAR_START, SCALAR_DIVIDER, SCALAR_END, GROUP_START, GROUP_END
     };
 
-    static std::map<OperationType, std::string> meme { 
+    static std::map<OperationType, std::string> meme {
         { OperationType::PLUS, "PLUS" },
         { OperationType::MINUS, "MINUS" },
         { OperationType::MULT, "MULT" },

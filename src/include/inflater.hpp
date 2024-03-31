@@ -6,8 +6,10 @@
 #include <optional>
 #include <climits>
 #include <iostream>
+#include <variant>
 
 #include "algorithm.hpp"
+#include "core_constants.hpp"
 
 namespace babp {
 namespace core {
@@ -47,8 +49,7 @@ namespace core {
 			std::string const& fStr,
 			Group const nameRange,
 			std::vector<Statement>& sequence
-		) const ;
-
+		) const;
 		std::optional<structural::OperationType> getOperationOrNull(char const c) const;
 		std::string filterSpaces(std::string const& fStr) const;
 		void filterSpaces(std::string &fStr) const;
@@ -61,6 +62,20 @@ namespace core {
 		std::vector<Statement> inflate(std::string &&functionStr) const;
 
 		void printStatement(std::ostream &output, Statement const& statement) const;
+	};
+
+	class ArgumentInflater {
+
+		std::unordered_map<std::string, std::string> getStringedTypes(std::vector<std::string> types) const;
+
+		public:
+		structural::Variable parseVarType(std::string varTypeName, std::string varName) const;
+
+		std::unordered_map<std::string, structural::Variable> parseVarTypes(std::vector<std::string> types) const {
+			auto stringedTypes = getStringedTypes(std::move(types));
+		    std::unordered_map<std::string, structural::Variable> result;
+			return result;
+		}
 	};
 
 } // namespace core

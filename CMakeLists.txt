@@ -5,12 +5,14 @@ include(CTest)
 set(COMMON_SOURCES)
 
 set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address,undefined -Wall -Wextra")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS "-std=c++17")
 
 add_executable(
     BaBP ${COMMON_SOURCES} 
     src/main/platform.cpp
     src/main/inflater.cpp
+    src/main/utils.cpp
 )
 
 target_include_directories(BaBP
