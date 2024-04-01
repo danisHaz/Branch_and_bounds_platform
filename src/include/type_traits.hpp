@@ -45,6 +45,15 @@ namespace core {
         static constexpr bool value = getSameTypeIndex<T, Args...>() != sizeof...(Args) ? true : false;
     };
 
+    template < int colsNumber >
+    using Vector_st_t = Eigen::Matrix<double, 1, colsNumber>;
+
+    template < int colsNumber >
+    using Vector_col_st_t = Eigen::Matrix<double, colsNumber, 1>;
+
+    template < int colsNumber, int rowsNumber >
+    using Matrix_st_t = Eigen::Matrix<double, rowsNumber, colsNumber>;
+
     using Vector_t = Eigen::Matrix<double, 1, Eigen::Dynamic>;
     using Vector_col_t = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 	using Matrix_t = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
