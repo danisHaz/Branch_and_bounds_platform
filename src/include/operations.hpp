@@ -41,19 +41,18 @@ namespace core {
             assert(rightArg != 0);
             return leftArg / rightArg;
         }
-            
+
         if constexpr (operation == Oper_t::SCALAR_DIVIDER) {
-            constexpr bool isSame = isSameTypes<LeftArg_t, RightArg_t>();
-            assert(isSame);
+            // constexpr bool isSame = isSameTypes<LeftArg_t, RightArg_t>();
+            // assert(isSame);
             if constexpr (isIntegralType<LeftArg_t>() && isIntegralType<RightArg_t>()) {
                 warning(
                     "operations: Both computing arguments should not be of same type in scalar multiplication."
                 );
-
                 return leftArg * rightArg;
+            } else {
+                return leftArg.dot(rightArg);
             }
-
-            return leftArg.dot(rightArg);
         }
 
         throw std::logic_error("operations: computing operation is utility or not supported.");

@@ -2,6 +2,6 @@
 
 #include <iostream>
 
-void warning(char const* message) {
+void babp::core::warning(char const* message) {
     std::cout << message << "\n";
 }

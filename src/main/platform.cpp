@@ -7,15 +7,10 @@
 #include <iostream>
 
 int main() {
-    Eigen::Matrix2d m;
-    Eigen::Matrix2d p;
-    m << 1, 2, 3, 4;
-    p << 1, 2, 3, 4;
-
-    using namespace babp::core;
-
-    auto v = compute<decltype(m), decltype(p), structural::OperationType::PLUS>(m, p);
-
-    std::cout << v;
+    Eigen::Matrix<int, 1, Eigen::Dynamic> a;
+    a.resize(Eigen::NoChange, 3);
+    a << 1, 2, 3;
+    Eigen::Matrix<int, 1, 3> res(5 * a);
+    std::cout << typeid(res).name();
     return 0;
 }
