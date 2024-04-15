@@ -10,6 +10,7 @@
 
 #include "algorithm.hpp"
 #include "core_constants.hpp"
+#include "operations.hpp"
 
 namespace babp {
 namespace core {

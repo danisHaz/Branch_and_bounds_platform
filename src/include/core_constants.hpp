@@ -25,5 +25,10 @@ namespace core {
 
 	static char const SEMICOLON = ':';
 
+	// other
+	static int KEY_LEN = 32;
+	static constexpr int KEY_ALPHABET_START = int('a');
+	static constexpr int KEY_ALPHABET_LEN = ('z' - 'a') + 1;
+
 } // namespace core
 } // namespace babp

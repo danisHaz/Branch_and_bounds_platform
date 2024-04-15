@@ -83,9 +83,37 @@ namespace core {
             contains_type<std::optional<T>, Matrix_var_t>::value;
     }
 
+    template < typename T >
+    constexpr bool isVectorType() {
+        using dt = std::decay_t<T>;
+        return std::is_same_v<dt, std::decay_t<Vector_t>> ||
+            std::is_same_v<dt, std::decay_t<Vector_col_t>> ||
+            std::is_same_v<dt, std::optional<std::decay_t<Vector_t>>> ||
+            std::is_same_v<dt, std::optional<std::decay_t<Vector_col_t>>>;
+    }
+
     template < typename T, typename U >
     constexpr bool isSameTypes() {
         return std::is_same_v<T, U>;
+    }
+
+    template < typename T >
+    constexpr auto matrix_static_cast(T matrix) {
+        using T_decay = std::decay_t<T>;
+
+        // if constexpr (contains_type<T_decay, Matrix_var_t>::value) {
+            if constexpr (std::is_same_v<T_decay, Matrix_t> || std::is_same_v<T_decay, Eigen::Matrix<double, 1, 1>>) {
+                return static_cast<Matrix_t>(matrix);
+            } else if constexpr (std::is_same_v<T_decay, Vector_t>) {
+                return static_cast<Vector_t>(matrix);
+            } else if constexpr (std::is_same_v<T_decay, Vector_col_t>) {
+                return static_cast<Vector_col_t>(matrix);
+            } else {
+                int a = "5";
+            }
+        // } else {
+        //     return matrix;
+        // }
     }
 
 } // namespace core

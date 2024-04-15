@@ -7,8 +7,6 @@ namespace core {
 
     class Backend {
 
-        
-
         public:
         void solve() const;
     };

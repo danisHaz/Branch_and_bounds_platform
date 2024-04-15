@@ -1,5 +1,9 @@
 #pragma once
 
+#include <string>
+
+#include "core_constants.hpp"
+
 namespace babp {
 namespace core {
 
@@ -26,6 +30,9 @@ namespace core {
             }
         }
     }
+
+    auto getRandom();
+    std::string randomKey(std::size_t length = KEY_LEN);
 
 } // namespace core
 } // namespace babp

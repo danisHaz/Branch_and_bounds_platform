@@ -6,6 +6,8 @@ set(
     COMMON_SOURCES
     src/main/inflater.cpp
     src/main/utils.cpp
+    src/main/eigen_ext.cpp
+    src/main/operations.cpp
 )
 
 set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address,undefined -Wall -Wextra")

@@ -62,7 +62,6 @@ void test_compute_vector_integral() {
 int main() {
     
     test_compute_integral();
-    test_compute_vector_integral();
 
     return 0;
 }

@@ -6,23 +6,24 @@
 #include <vector>
 #include <utility>
 #include <map>
+#include <memory>
 
 #include <Dense>
 
 #include "type_traits.hpp"
+#include "operations.hpp"
 
 namespace babp {
 namespace core {
-
 namespace structural {
 
-    template < typename ComputationResult >
     class FunctionalComputable {
 
-        virtual ComputationResult compute() const = 0;
+        public:
+        virtual Var_t compute() const = 0;
     };
 
-    struct Variable : FunctionalComputable<Var_t> {
+    struct Variable : public FunctionalComputable {
 
         private:
         Var_t value;
@@ -60,10 +61,6 @@ namespace structural {
         }
     };
 
-    enum class OperationType {
-        PLUS, MINUS, MULT, DIV, SCALAR_START, SCALAR_DIVIDER, SCALAR_END, GROUP_START, GROUP_END
-    };
-
     static std::map<OperationType, std::string> meme {
         { OperationType::PLUS, "PLUS" },
         { OperationType::MINUS, "MINUS" },
@@ -76,45 +73,67 @@ namespace structural {
         { OperationType::GROUP_END, "GROUP_END" },
     };
 
-    template < typename data_type >
-    class StructuralTreeNode : public FunctionalComputable<data_type> {
+    class StructuralTreeNode : public FunctionalComputable {
 
-        std::vector<FunctionalComputable<data_type>> arguments;
-        OperationType operation;
+        std::unique_ptr<FunctionalComputable> leftArg;
+        std::unique_ptr<FunctionalComputable> rightArg;
 
-        data_type computePlus() const {
-            assert(arguments.size() == 2);
-            return arguments[0].compute() + arguments[1].compute();
-        }
-        
-        data_type computeMinus() const {
-            assert(arguments.size() == 2);
-            return arguments[0].compute() - arguments[1].compute();
-        }
-
-        data_type computeMult() const {
-            assert(arguments.size() == 2);
-            return arguments[0].compute() * arguments[1].compute();
-        }
-
-        data_type computeDiv() const {
-            assert(arguments.size() == 2);
-            assert(arguments[1] != 0);
-            return arguments[0].compute() / arguments[1].compute();
-        }
-
-        data_type computeUnaryMinus() const {
-            assert(arguments.size() == 1);
-            return -arguments[0].compute();
-        }
+        const OperationType operation;
 
         public:
-        StructuralTreeNode(OperationType operation, FunctionalComputable... args): arguments { args... }, operation { operation } {}
 
-        data_type compute() const override {
-            if (operation == OperationType::PLUS) {
-                return computePlus();
-            }
+        StructuralTreeNode(
+            OperationType operation,
+            std::unique_ptr<FunctionalComputable> &&leftArg,
+            std::unique_ptr<FunctionalComputable> &&rightArg
+        ): leftArg { std::move(leftArg) }, rightArg { std::move(rightArg) }, operation { operation } {}        
+
+        Var_t compute() const override {
+            Var_t result;
+            std::visit([this, &result](auto &&left, auto &&right) {
+                if (left.has_value() && right.has_value()) {
+                    result = babp::core::compute(left, right, this->operation);
+                }
+            }, leftArg->compute(), rightArg->compute());
+
+            return result;
+        }
+    };
+
+    template < typename T >
+    class Bound {
+        std::function<bool(T)> _check;
+
+        public:
+        Bound(std::function<bool(T)> &&check): _check { std::move(check) } {}
+        Bound(std::function<bool(T)> const &check): _check { check } {}
+
+        bool check(T arg) {
+            return _check(arg);
+        }
+    };
+
+    template <>
+    class Bound<void> {
+        std::function<bool()> _check;
+
+        public:
+        Bound(std::function<bool()> &&check): _check { std::move(check) } {}
+        Bound(std::function<bool()> const &check): _check { check } {}
+
+        bool check() {
+            return _check();
+        }
+    };
+
+    template < typename Arg_t >
+    class IndexBoundSet {
+        std::vector<Bound<Arg_t>> bounds;
+        std::vector<std::string> keys;
+
+        public:
+        IndexBoundSet(std::vector<Bound<Arg_t>> &&bounds): bounds { bounds } {
+            
         }
     };
 } // namespace structural
