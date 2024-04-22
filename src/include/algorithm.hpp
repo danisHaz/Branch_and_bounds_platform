@@ -7,11 +7,13 @@
 #include <utility>
 #include <map>
 #include <memory>
+#include <cstdint>
 
 #include <Dense>
 
 #include "type_traits.hpp"
 #include "operations.hpp"
+#include "utils.hpp"
 
 namespace babp {
 namespace core {
@@ -97,43 +99,6 @@ namespace structural {
             }, leftArg->compute(), rightArg->compute());
 
             return result;
-        }
-    };
-
-    template < typename T >
-    class Bound {
-        std::function<bool(T)> _check;
-
-        public:
-        Bound(std::function<bool(T)> &&check): _check { std::move(check) } {}
-        Bound(std::function<bool(T)> const &check): _check { check } {}
-
-        bool check(T arg) {
-            return _check(arg);
-        }
-    };
-
-    template <>
-    class Bound<void> {
-        std::function<bool()> _check;
-
-        public:
-        Bound(std::function<bool()> &&check): _check { std::move(check) } {}
-        Bound(std::function<bool()> const &check): _check { check } {}
-
-        bool check() {
-            return _check();
-        }
-    };
-
-    template < typename Arg_t >
-    class IndexBoundSet {
-        std::vector<Bound<Arg_t>> bounds;
-        std::vector<std::string> keys;
-
-        public:
-        IndexBoundSet(std::vector<Bound<Arg_t>> &&bounds): bounds { bounds } {
-            
         }
     };
 } // namespace structural

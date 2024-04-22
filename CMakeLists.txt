@@ -4,10 +4,13 @@ include(CTest)
 
 set(
     COMMON_SOURCES
-    src/main/inflater.cpp
-    src/main/utils.cpp
+    src/main/backend.cpp
+    src/main/conjugate_coord_descent.cpp
     src/main/eigen_ext.cpp
+    src/main/index_bound_set.cpp
+    src/main/inflater.cpp
     src/main/operations.cpp
+    src/main/utils.cpp
 )
 
 set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address,undefined -Wall -Wextra")

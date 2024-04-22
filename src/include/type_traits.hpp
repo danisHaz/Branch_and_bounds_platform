@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types.hpp"
+
 #include <Dense>
 
 #include <variant>
@@ -45,30 +47,6 @@ namespace core {
         static constexpr bool value = getSameTypeIndex<T, Args...>() != sizeof...(Args) ? true : false;
     };
 
-    template < int colsNumber >
-    using Vector_st_t = Eigen::Matrix<double, 1, colsNumber>;
-
-    template < int colsNumber >
-    using Vector_col_st_t = Eigen::Matrix<double, colsNumber, 1>;
-
-    template < int colsNumber, int rowsNumber >
-    using Matrix_st_t = Eigen::Matrix<double, rowsNumber, colsNumber>;
-
-    using Vector_t = Eigen::Matrix<double, 1, Eigen::Dynamic>;
-    using Vector_col_t = Eigen::Matrix<double, Eigen::Dynamic, 1>;
-	using Matrix_t = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
-
-    using Integral_var_t = std::variant<
-        std::optional<int>,
-        std::optional<double>
-    >;
-
-    using Matrix_var_t = std::variant<
-        std::optional<Vector_t>,
-        std::optional<Vector_col_t>,
-        std::optional<Matrix_t>
-    >;
-
     using Var_t = combine_variants<Integral_var_t, Matrix_var_t>::value;
 
     template < typename T >
@@ -102,7 +80,7 @@ namespace core {
         using T_decay = std::decay_t<T>;
 
         // if constexpr (contains_type<T_decay, Matrix_var_t>::value) {
-            if constexpr (std::is_same_v<T_decay, Matrix_t> || std::is_same_v<T_decay, Eigen::Matrix<double, 1, 1>>) {
+            if constexpr (std::is_same_v<T_decay, Matrix_t> || std::is_same_v<T_decay, Matrix_costyl_t>) {
                 return static_cast<Matrix_t>(matrix);
             } else if constexpr (std::is_same_v<T_decay, Vector_t>) {
                 return static_cast<Vector_t>(matrix);
