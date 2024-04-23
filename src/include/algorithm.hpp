@@ -14,16 +14,11 @@
 #include "type_traits.hpp"
 #include "operations.hpp"
 #include "utils.hpp"
+#include "functional_computable.hpp"
 
 namespace babp {
 namespace core {
 namespace structural {
-
-    class FunctionalComputable {
-
-        public:
-        virtual Var_t compute() const = 0;
-    };
 
     struct Variable : public FunctionalComputable {
 

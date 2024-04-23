@@ -29,7 +29,7 @@ namespace core {
             Argument_t prevX;
             Argument_t x { initialX };
             int iterStep = 0;
-            while (isFirstIteration || checkIfDistinct(prevX, x) && iterStep < MAX_ITER_COUNT) {
+            while (isFirstIteration || (checkIfDistinct(prevX, x) && iterStep < MAX_ITER_COUNT)) {
                 isFirstIteration = false;
                 iterStep++;
 

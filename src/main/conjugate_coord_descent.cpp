@@ -83,7 +83,7 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solve() const {
             [this, &y, &d](double x) {
                 auto vec = calculateDerivativeFunction(y + x * d);
                 double nextX;
-                for (std::size_t ind = 0; ind < d.size(); ind++) {
+                for (int ind = 0; ind < d.size(); ind++) {
                     if (d[ind] == 0) {
                         continue;
                     }

@@ -4,8 +4,10 @@
 #include <variant>
 
 #include "type_traits.hpp"
+#include "types.hpp"
 #include "utils.hpp"
 #include "eigen_ext.hpp"
+#include "index_bound_set.hpp"
 
 namespace babp {
 namespace core {
@@ -60,6 +62,17 @@ namespace structural {
     }
 
     Var_t compute(Var_t const& leftArg, Var_t const& rightArg, structural::OperationType const operation);
+
+    class LowerBoundOfNode {
+
+        Matrix_t Q;
+        Vector_t b, alpha, beta;
+
+        public:
+        LowerBoundOfNode(Matrix_t Q, Vector_t b, Vector_t alpha, Vector_t beta);
+
+        double compute(Indices const& indices, Vector_t const& x) const;
+    };
 
 } // namespace core
 } // namespace babp

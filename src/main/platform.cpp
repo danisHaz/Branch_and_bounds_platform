@@ -5,6 +5,8 @@
 
 #include "gradient_descent.hpp"
 #include "conjugate_coord_descent.hpp"
+#include "operations.hpp"
+#include "index_bound_set.hpp"
 
 int main() {
 
@@ -52,7 +54,11 @@ int main() {
         3, 3, std::move(derivativeFunc), std::move(alphaParamFunc)
     };
 
-    std::cout << descent.solve();
+    Eigen::Vector3d originalX = originalSolutionFunc(descent.solve());
+    babp::core::Indices indices { 3, 3 };
+    babp::core::LowerBoundOfNode lowerBound { std::move(Q), std::move(b), std::move(alpha), std::move(beta) };
+
+    std::cout << lowerBound.compute(indices, originalX);
 
     return 0;
 }

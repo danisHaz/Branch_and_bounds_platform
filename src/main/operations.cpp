@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "operations.hpp"
 #include "type_traits.hpp"
 
@@ -96,4 +98,33 @@ Var_t compute(Var_t const& leftArg, Var_t const& rightArg, structural::Operation
     }, leftArg, rightArg);
 
     return result;
+}
+
+babp::core::LowerBoundOfNode::LowerBoundOfNode(
+    Matrix_t Q,
+    Vector_t b,
+    Vector_t alpha,
+    Vector_t beta
+): Q { std::move(Q) }, b { std::move(b) }, alpha { std::move(alpha) }, beta { std::move(beta) } {}
+
+double babp::core::LowerBoundOfNode::compute(babp::core::Indices const& indices, babp::core::Vector_t const& x) const {
+    double lowerBound = 0;
+    indices.iterateOver([&indices, &x, &lowerBound, this](int i) {
+        indices.iterateOver([&i, &x, &lowerBound, this](int j) {
+            lowerBound += Q.coeff(i, j) * x[i] * x[j];
+        });
+
+        lowerBound += b[i] * x[i];
+        
+        indices.iterateOverNonExisting([&i, &x, &lowerBound, this](int t) {
+            lowerBound += std::min(Q.coeff(t, i) * x[i] * alpha[i], Q.coeff(t, i) * x[i] * beta[i]);
+        });
+    });
+
+    indices.iterateOverNonExisting([&x, &lowerBound, this](int t) {
+        lowerBound += std::min(Q.coeff(t, t) * alpha[t] * alpha[t], Q.coeff(t, t) * beta[t] * beta[t]);
+        lowerBound += std::min(b[t] * alpha[t], b[t] * beta[t]);
+    });
+
+    return lowerBound;
 }

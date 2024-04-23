@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Dense>
-
 #include <variant>
 #include <optional>
 

@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "utils.hpp"
-#include "algorithm.hpp"
+#include "functional_computable.hpp"
 
 namespace babp {
 namespace core {
@@ -82,15 +82,16 @@ namespace core {
 
     class Indices {
         int indicesMaxCount;
-        std::uint64_t _indices;
+        std::int64_t _indices;
 
         public:
-        Indices(int indicesMaxCount, std::uint64_t indices);
+        Indices(int indicesMaxCount, std::int64_t indices);
         Indices(int indicesMaxCount, std::vector<int> const& indices);
 
         Indices setIndex(int newIndex) const;
         Indices removeIndex(int removeIndex) const;
-        void iterateOver(std::function<void(int)> const& onNewIndex) const;
+        void iterateOver(std::function<void(int)> const& onEach) const;
+        void iterateOverNonExisting(std::function<void(int)> const& onEach) const;
     };
 
 } // namespace core

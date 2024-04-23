@@ -1,7 +1,5 @@
 #pragma once
 
-#include "algorithm.hpp"
-
 namespace babp {
 namespace core {
 
