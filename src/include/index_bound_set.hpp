@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <string>
 
 #include "utils.hpp"
 #include "functional_computable.hpp"
@@ -92,6 +93,9 @@ namespace core {
         Indices removeIndex(int removeIndex) const;
         void iterateOver(std::function<void(int)> const& onEach) const;
         void iterateOverNonExisting(std::function<void(int)> const& onEach) const;
+        bool checkIndex(int index) const;
+
+        std::string toString() const;
     };
 
 } // namespace core

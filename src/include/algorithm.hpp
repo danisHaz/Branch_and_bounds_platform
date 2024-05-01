@@ -96,6 +96,56 @@ namespace structural {
             return result;
         }
     };
+
+    class IndicesGenerator {
+        std::vector<int> g;
+        std::function<int(std::vector<int> const&, int)> nextFunc;
+        int maxIndex;
+        int step = 0;
+
+        public:
+        IndicesGenerator(
+            int maxIndex,
+            std::vector<int> generator,
+            std::function<int(std::vector<int> const&, int)> nextFunc
+        ): maxIndex { maxIndex }, g { std::move(generator) }, nextFunc { std::move(nextFunc) } {}
+
+        IndicesGenerator(
+            int const maxIndex,
+            std::function<int(std::vector<int>, int)> nextFunc
+        ): maxIndex { maxIndex }, nextFunc { std::move(nextFunc) } {}
+
+        IndicesGenerator(IndicesGenerator &&other):
+            maxIndex { other.maxIndex },
+            g { std::move(other.g) },
+            nextFunc { std::move(other.nextFunc) },
+            step { other.step }
+        {}
+
+        IndicesGenerator& operator=(IndicesGenerator &&other) {
+            g = std::move(other.g);
+            nextFunc = std::move(other.nextFunc);
+            step = other.step;
+            maxIndex = other.maxIndex;
+            return *this;
+        }
+
+        IndicesGenerator(IndicesGenerator const& other) = default;
+        IndicesGenerator& operator=(IndicesGenerator const& other) = default;
+
+        int next() {
+            return (step != maxIndex ? nextFunc(g, step++) : -1);
+        }
+
+        void reset() {
+            step = 0;
+        }
+
+        std::string toString() const {
+            return std::to_string(step);
+        }
+    };
+
 } // namespace structural
 
 } // namespace core

@@ -12,18 +12,26 @@ namespace core {
 
         std::size_t n;
         std::size_t boundsSize;
-        std::function<Vector_t(Vector_t const&)> calculateDerivativeFunction;
-        std::function<double(Vector_t const&, Vector_t const&)> calculateAlphaParam;
 
         public:
         ConjugateCoordDescent(
             std::size_t spaceSize,
-            std::size_t boundsSize,
-            std::function<Vector_t(Vector_t const&)> calculateDerivativeFunction,
-            std::function<double(Vector_t const&, Vector_t const&)> calculateAlphaParam
+            std::size_t boundsSize
         );
 
-        Vector_t solve() const;
+        Vector_t solve(
+            std::function<double(Vector_t const&, int const)> const& calculatePartialDerivative,
+            std::function<Vector_t(Vector_t const&)> const& calculateDerivativeFunction,
+            std::function<double(Vector_t const&)> const& calculcateMainFunction,
+            std::function<double(Vector_t const&, Vector_t const&)> const& calculateAlphaParam
+        ) const;
+
+        Vector_t solveAlternative(
+            std::function<double(Vector_t const&, int const)> const& calculatePartialDerivative,
+            std::function<Vector_t(Vector_t const&)> const& calculateDerivativeFunction,
+            std::function<double(Vector_t const&)> const& calculcateMainFunction,
+            std::function<double(Vector_t const&, Vector_t const&)> const& calculateAlphaParam
+        ) const;
     };
 
 } // namespace core

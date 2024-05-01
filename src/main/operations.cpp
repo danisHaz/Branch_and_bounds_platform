@@ -105,7 +105,7 @@ babp::core::LowerBoundOfNode::LowerBoundOfNode(
     Vector_t b,
     Vector_t alpha,
     Vector_t beta
-): Q { std::move(Q) }, b { std::move(b) }, alpha { std::move(alpha) }, beta { std::move(beta) } {}
+): Q { Q }, b { b }, alpha { alpha }, beta { beta } {}
 
 double babp::core::LowerBoundOfNode::compute(babp::core::Indices const& indices, babp::core::Vector_t const& x) const {
     double lowerBound = 0;
@@ -115,7 +115,7 @@ double babp::core::LowerBoundOfNode::compute(babp::core::Indices const& indices,
         });
 
         lowerBound += b[i] * x[i];
-        
+
         indices.iterateOverNonExisting([&i, &x, &lowerBound, this](int t) {
             lowerBound += std::min(Q.coeff(t, i) * x[i] * alpha[i], Q.coeff(t, i) * x[i] * beta[i]);
         });

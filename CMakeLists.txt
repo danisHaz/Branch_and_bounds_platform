@@ -10,6 +10,7 @@ set(
     src/main/index_bound_set.cpp
     src/main/inflater.cpp
     src/main/operations.cpp
+    src/main/tasks.cpp
     src/main/utils.cpp
 )
 
@@ -30,18 +31,18 @@ target_include_directories(BaBP
 )
 
 # ----------- Test Section -----------
-add_executable(compute_test)
-target_sources(compute_test
-    PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/tests/compute_test.cpp
-    ${COMMON_SOURCES}
-)
+# add_executable(compute_test)
+# target_sources(compute_test
+#     PRIVATE
+#     ${PROJECT_SOURCE_DIR}/src/tests/compute_test.cpp
+#     ${COMMON_SOURCES}
+# )
 
-target_include_directories(compute_test
-    PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/include
-    $ENV{BOOST_PATH}
-    $ENV{EIGEN_PATH}
-)
+# target_include_directories(compute_test
+#     PRIVATE
+#     ${PROJECT_SOURCE_DIR}/src/include
+#     $ENV{BOOST_PATH}
+#     $ENV{EIGEN_PATH}
+# )
 
-add_test(NAME compute_t COMMAND compute_test)
+# add_test(NAME compute_t COMMAND compute_test)

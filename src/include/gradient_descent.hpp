@@ -18,7 +18,7 @@ namespace core {
             Argument_t initialValue,
             std::function<Argument_t(Argument_t const&)> calculateTarget,
             std::function<bool(Argument_t const&, Argument_t const&)> checkIfDistinct,
-            int maxIterationCount = 100
+            int maxIterationCount = 1000
         ): initialX { initialValue },
            calculateTarget { std::move(calculateTarget) },
            checkIfDistinct { std::move(checkIfDistinct) },
