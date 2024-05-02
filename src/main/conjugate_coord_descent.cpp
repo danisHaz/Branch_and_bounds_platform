@@ -4,20 +4,20 @@
 
 #include <Dense>
 
+#include "defines.hpp"
 #include "conjugate_coord_descent.hpp"
 #include "index_bound_set.hpp"
 #include "gradient_descent.hpp"
 
 babp::core::ConjugateCoordDescent::ConjugateCoordDescent(
-    std::size_t spaceSize,
-    std::size_t boundsSize
+    int spaceSize,
+    int boundsSize
 ): n { spaceSize },
    boundsSize { boundsSize } {}
 
 babp::core::Vector_t babp::core::ConjugateCoordDescent::solve(
     std::function<double(Vector_t const&, int const)> const& calculatePartialDerivative,
     std::function<Vector_t(Vector_t const&)> const& calculateDerivativeFunction,
-    std::function<double(Vector_t const&)> const& calculcateMainFunction,
     std::function<double(Vector_t const&, Vector_t const&)> const& calculateAlphaParam
 ) const {
     using namespace babp::core;
@@ -29,7 +29,7 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solve(
     Matrix_t identity { Matrix_t::Identity(boundsSize, boundsSize) };
     Matrix_t t { Matrix_t::Zero(boundsSize, boundsSize) };
 
-    for (std::size_t k_iteration = 0; k_iteration <= n; k_iteration++) {
+    for (int k_iteration = 0; k_iteration <= n; k_iteration++) {
         // a-part of algorithm
         int l_index { 0 }; double minResult { DBL_MAX };
 
@@ -55,11 +55,8 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solve(
 
         indices.iterateOver([&identity, &l_index, &calculateAlphaParam, &t, &sum](int step) {
             double alpha = calculateAlphaParam(identity.row(l_index), t.row(step));
-            // std::cout << identity.row(l_index) << " " << t.row(step) << " alpha\n";
             sum += alpha * t.row(step);
         });
-
-        // std::cout << sum << " sum\n";
 
         Vector_t p = identity.row(l_index) - sum;
 
@@ -87,8 +84,6 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solve(
             1,
             [&y, &d, &calculateDerivativeFunction](double x) {
                 auto vec = calculateDerivativeFunction(y + x * d);
-                // std::cout << y << " y vec\n";
-                // std::cout << d << " d vec\n";
                 double nextX = 0;
                 for (int ind = 0; ind < d.size(); ind++) {
                     if (d[ind] == 0) {
@@ -97,9 +92,6 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solve(
                     nextX = (vec - y)[ind] / d[ind]; // ???
                     break;
                 }
-
-                // std::cout << nextX << " nextX\n";
-
                 return nextX;
             },
             [](double prev, double cur) {
@@ -108,9 +100,6 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solve(
         };
 
         double lambda = std::max(descentAlgo.solve(), 0.0);
-
-        // std::cout << lambda << " lambda\n";
-
         y = y + lambda * d;
     }
 
@@ -118,12 +107,9 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solve(
 }
 
 babp::core::Vector_t babp::core::ConjugateCoordDescent::solveAlternative(
-    std::function<double(Vector_t const&, int const)> const& calculatePartialDerivative,
-    std::function<Vector_t(Vector_t const&)> const& calculateDerivativeFunction,
-    std::function<double(Vector_t const&)> const& calculcateMainFunction,
-    std::function<double(Vector_t const&, Vector_t const&)> const& calculateAlphaParam
+    std::function<Vector_t(Vector_t const&)> const& calculateDerivativeFunction
 ) const {
-    Vector_t prevY { boundsSize }; prevY.fill(1);
+    Vector_t prevY { Vector_t::Ones(boundsSize) };
     Vector_t y { Vector_t::Zero(boundsSize) };
     double EPS = 0.005;
     int k = 0, MAX_K = 1000;
@@ -132,36 +118,41 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solveAlternative(
         auto prevAntigrad = antigrad;
         auto direction = antigrad;
         auto partialSolution = y;
-        for (int j = 1; j < n; j++) {
-            GradientDescent<double> descentAlgo {
-                1,
-                [&partialSolution, &direction, &calculateDerivativeFunction](double x) {
-                    auto vec = calculateDerivativeFunction(partialSolution + x * direction);
-                    // std::cout << y << " y vec\n";
-                    // std::cout << d << " d vec\n";
-                    double nextX = 0;
-                    for (int ind = 0; ind < direction.size(); ind++) {
-                        if (direction[ind] == 0) {
-                            continue;
-                        }
-                        nextX = (vec - partialSolution)[ind] / direction[ind]; // ???
-                        break;
+
+        GradientDescent<double> descentAlgo {
+            1,
+            [&partialSolution, &direction, &calculateDerivativeFunction](double x) {
+                auto vec = calculateDerivativeFunction(partialSolution + x * direction);
+                PRINT("conjigate descent alternative, y:");
+                PRINT(partialSolution);
+                PRINT("conjigate descent alternative, direction:");
+                PRINT(direction);
+                PRINT("conjigate descent alternative, lambdax:");
+                PRINT(x);
+                double nextX = 0;
+                for (int ind = 0; ind < direction.size(); ind++) {
+                    if (direction[ind] == 0) {
+                        continue;
                     }
-
-                    // std::cout << nextX << " nextX\n";
-
-                    return nextX;
-                },
-                [](double prev, double cur) {
-                    return (abs(prev - cur) > 0.05);
+                    nextX = (vec - partialSolution)[ind] / direction[ind]; // ???
+                    break;
                 }
-            };
+                return nextX;
+            },
+            [](double prev, double cur) {
+                return (abs(prev - cur) > 0.05);
+            }
+        };
 
+        for (int j = 0; j < n; j++) {
             double lambda = std::max(descentAlgo.solve(), 0.0);
             partialSolution = (partialSolution + lambda * direction).eval();
-            auto w = std::max(0.0, (antigrad.dot(antigrad)) / (prevAntigrad.dot(prevAntigrad)));
 
-            direction = (-calculateDerivativeFunction(partialSolution) + w * direction).eval();
+            prevAntigrad = antigrad;
+            antigrad = (-calculateDerivativeFunction(partialSolution)).eval();
+
+            auto w = std::max(0.0, (antigrad.dot(antigrad)) / (prevAntigrad.dot(prevAntigrad)));
+            direction = (antigrad + w * direction).eval();
         }
 
         prevY = y;

@@ -18,10 +18,10 @@ namespace core {
 	static char const VARIABLE_NAME_SIGN = '$';
 
 	// declared types
-	static char const* INT_T = "Int";
-	static char const* DOUBLE_T = "Double";
-	static char const* MATRIX_T = "Matrix";
-	static char const* VECTOR_T = "Vector";
+	// static char const* INT_T = "Int";
+	// static char const* DOUBLE_T = "Double";
+	// static char const* MATRIX_T = "Matrix";
+	// static char const* VECTOR_T = "Vector";
 
 	static char const SEMICOLON = ':';
 

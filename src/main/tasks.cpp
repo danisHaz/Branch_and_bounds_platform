@@ -1,10 +1,13 @@
 #include <iostream>
 #include <cmath>
 #include <functional>
+#include <iostream>
 
 #include "Dense"
 
 #include "tasks.hpp"
+#include "defines.hpp"
+#include "solution.hpp"
 
 std::function<int(std::vector<int> const&, int)> indexGenStraight() {
     return [](std::vector<int> const& params, int index) {
@@ -20,15 +23,19 @@ void solve(
     Eigen::VectorXd d,
     Eigen::MatrixXd Q,
     Eigen::VectorXd alpha,
-    Eigen::VectorXd beta
+    Eigen::VectorXd beta,
+    std::function<int(std::vector<int> const&, int)> &&indexGenerator,
+    std::ostream &output = std::cout
 ) {
 
-    std::cout << alpha << "\n" << beta << "\n";
+    PRINT(alpha); PRINT(beta);
 
     Eigen::MatrixXd C = (-A * Q.inverse() * A.transpose()).eval();
     Eigen::VectorXd p = (-(b + A * Q.inverse() * d)).eval();
 
-    // std::cout << A << " C\n";
+    PRINT(A);
+    PRINT(Q.transpose());
+    PRINT(p);
 
     auto derivativeFunc = [&C, &p](Eigen::VectorXd y) {
         return (C * y + p).eval();
@@ -63,8 +70,7 @@ void solve(
     };
 
     auto recalculateParams = [&](babp::core::Indices const& lowerBound, babp::core::Indices const& upperBound) {
-        // std::cout << "recalc begin\n";
-        std::cout << A << " A\n";
+        PRINT(A);
         b.fill(0);
         A.fill(0);
         lowerBound.iterateOver([&](int step){
@@ -79,7 +85,6 @@ void solve(
 
         C = (-A * Q.inverse() * A.transpose()).eval();
         p = (-(b + A * Q.inverse() * d)).eval();
-        // std::cout << "recalc end\n";
     };
 
     auto isInProvidedBounds = [&A, &alpha, &beta](Eigen::VectorXd const& x) {
@@ -95,7 +100,7 @@ void solve(
     };
 
     babp::core::structural::IndicesGenerator generator {
-        boundsSize, indexGenStraight()
+        boundsSize, std::move(indexGenerator)
     };
 
     babp::core::LowerBoundOfNode lowerBoundOfNode {
@@ -117,19 +122,11 @@ void solve(
         std::move(isInProvidedBounds)
     };
 
-    babp::core::Backend backend { std::move(holder) };
-
-    auto solution = backend.solve();
-
-    // Eigen::VectorXd kek;
-    // kek << alpha[0], alpha[1], alpha[2];
-    // std::cout << costFunc(kek) << "\n";
-
-    std::cout << costFunc(solution) << '\n';
+    auto solution = babp::solver::solve(std::move(holder));
+    output << costFunc(solution) << '\n';
 }
 
 void task1(int dimensionSize, int boundsSize) {
-
     Eigen::MatrixXd Q { Eigen::MatrixXd::Zero(dimensionSize, dimensionSize) };
     Eigen::VectorXd alpha; alpha.resize(dimensionSize);
     Eigen::VectorXd beta; beta.resize(dimensionSize);
@@ -148,5 +145,112 @@ void task1(int dimensionSize, int boundsSize) {
     Eigen::VectorXd b = Eigen::VectorXd::Zero(boundsSize);
     Eigen::MatrixXd A = Eigen::MatrixXd::Zero(boundsSize, dimensionSize);
 
-    solve(dimensionSize, boundsSize, std::move(A), std::move(b), std::move(d), std::move(Q), std::move(alpha), std::move(beta));
+    solve(
+        dimensionSize,
+        boundsSize,
+        std::move(A),
+        std::move(b),
+        std::move(d),
+        std::move(Q),
+        std::move(alpha),
+        std::move(beta),
+        indexGenStraight()
+    );
+}
+
+void task2(int dimensionSize, int boundsSize) {
+    Eigen::MatrixXd Q { Eigen::MatrixXd::Zero(dimensionSize, dimensionSize) };
+    Eigen::VectorXd alpha; alpha.resize(dimensionSize);
+    Eigen::VectorXd beta; beta.resize(dimensionSize);
+
+    for (int index = 0; index < dimensionSize; index++) {
+        alpha[index] = -1;
+        beta[index] = dimensionSize / (index + 1);
+    }
+
+    for (int index = 0; index < dimensionSize; index++) {
+        Q(index, index) = -1;
+    }
+
+    Eigen::VectorXd d { Eigen::VectorXd::Ones(dimensionSize) };
+
+    Eigen::VectorXd b = Eigen::VectorXd::Zero(boundsSize);
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(boundsSize, dimensionSize);
+
+    solve(
+        dimensionSize,
+        boundsSize,
+        std::move(A),
+        std::move(b),
+        std::move(d),
+        std::move(Q),
+        std::move(alpha),
+        std::move(beta),
+        indexGenStraight()
+    );
+}
+
+void task3(int dimensionSize, int boundsSize) {
+    Eigen::MatrixXd Q { Eigen::MatrixXd::Zero(dimensionSize, dimensionSize) };
+    Eigen::VectorXd alpha; alpha.resize(dimensionSize);
+    Eigen::VectorXd beta; beta.resize(dimensionSize);
+
+    for (int index = 0; index < dimensionSize; index++) {
+        alpha[index] = -(dimensionSize - (index + 1) + 1);
+        beta[index] = dimensionSize + (index + 1) / 2.0;
+    }
+
+    for (int index = 0; index < dimensionSize; index++) {
+        Q(index, index) = -1;
+    }
+
+    Eigen::VectorXd d { Eigen::VectorXd::Zero(dimensionSize) };
+
+    Eigen::VectorXd b = Eigen::VectorXd::Zero(boundsSize);
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(boundsSize, dimensionSize);
+
+    solve(
+        dimensionSize,
+        boundsSize,
+        std::move(A),
+        std::move(b),
+        std::move(d),
+        std::move(Q),
+        std::move(alpha),
+        std::move(beta),
+        indexGenStraight()
+    );
+}
+
+void task4(int dimensionSize, int boundsSize) {
+    Eigen::MatrixXd Q { Eigen::MatrixXd::Zero(dimensionSize, dimensionSize) };
+    Eigen::VectorXd alpha; alpha.resize(dimensionSize);
+    Eigen::VectorXd beta; beta.resize(dimensionSize);
+
+    for (int index = 0; index < dimensionSize; index++) {
+        alpha[index] = 1 - (index + 1);
+        beta[index] = 2 * (index + 1);
+    }
+
+    Eigen::VectorXd d { dimensionSize };
+
+    for (int index = 0; index < dimensionSize; index++) {
+        d[index] = -(index + 1);
+        Q(index, index) = -1;
+    }
+
+    Eigen::VectorXd b = Eigen::VectorXd::Zero(boundsSize);
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(boundsSize, dimensionSize);
+
+    solve(
+        dimensionSize,
+        boundsSize,
+        std::move(A),
+        std::move(b),
+        std::move(d),
+        std::move(Q),
+        std::move(alpha),
+        std::move(beta),
+        indexGenStraight()
+    );
 }

@@ -6,8 +6,9 @@
 #include "conjugate_coord_descent.hpp"
 #include "operations.hpp"
 #include "index_bound_set.hpp"
+#include "defines.hpp"
 
-babp::core::Vector_t babp::core::Backend::solve() {
+babp::core::Vector_t babp::core::Backend::solve(std::ostream &output) const {
     Vector_t currentResult;
 
     std::queue<TreeNodeArguments> nodes;
@@ -20,7 +21,7 @@ babp::core::Vector_t babp::core::Backend::solve() {
         nodesCount++;
         auto node = nodes.front(); nodes.pop();
 
-        std::cout << node.toString();
+        PRINT(node.toString());
 
         auto const& lowerBound = node.lowerBound;
         auto const& upperBound = node.upperBound;
@@ -30,19 +31,19 @@ babp::core::Vector_t babp::core::Backend::solve() {
         // side effect function to recalculate all properties before node pushing
         recalculateBaseMatrices(lowerBound, upperBound);
 
-        auto meme = descent.solveAlternative(conjugatePartialDerivativeFunc, calculateDerivativeFunction, assistiveTaskCostFunc, calculateAlphaParam);
+        auto meme = descent.solveAlternative(calculateDerivativeFunction);
 
-        std::cout << meme << " yyy\n";
+        PRINT(meme);
 
         Vector_t x = calculateOriginalSolution(
             meme
         );
 
-        std::cout << x << " xxx\n";
+        PRINT(x);
 
         auto fLow = lowerBoundOfNode.compute(lowerBound, x);
 
-        std::cout << fLow << " flow\n";
+        PRINT(fLow);
 
         if (fLow > fRec) {
             continue;
@@ -53,13 +54,13 @@ babp::core::Vector_t babp::core::Backend::solve() {
         if (!x.hasNaN()) {
             fRec = fLow;
             currentResult = x;
-            std::cout << calculateCostFunction(currentResult) << " curres\n";
-            std::cout << lowerBound.toString() << " - lower, " << upperBound.toString() << " - upper\n";
+            PRINT(calculateCostFunction(currentResult));
+            PRINT(lowerBound.toString()); PRINT(upperBound.toString());
         }
 
         int nextIndex = generator.next();
 
-        std::cout << nextIndex << " next index\n";
+        PRINT(nextIndex);
 
         // push with updated lower
         if (nextIndex == -1) {
@@ -75,11 +76,30 @@ babp::core::Vector_t babp::core::Backend::solve() {
         );
     }
 
-    std::cout << "current result: " << currentResult << "\n";
-
-    std::cout << "nodes count: " << nodesCount << "\n";
+    output << "current result: " << currentResult << "\n";
+    output << "nodes count: " << nodesCount << "\n";
 
     return currentResult;
+}
+
+babp::core::Vector_t babp::core::Backend::solveAsync(std::ostream &output) {
+    Vector_t currentResult;
+
+    std::queue<TreeNodeArguments> nodes;
+    nodes.push(TreeNodeArguments { __DBL_MAX__, Indices { dimensionSize, 0 }, Indices { dimensionSize, 0 }, this->indicesGenerator });
+
+    ConjugateCoordDescent descent { dimensionSize, boundsSize };
+    std::size_t nodesCount = 0;
+
+    while (!nodes.empty()) {
+        nodesCount++;
+        auto node = nodes.front(); nodes.pop();
+
+        auto const& lowerBound = node.lowerBound;
+        auto const& upperBound = node.upperBound;
+        auto generator = std::move(node.generator);
+        auto fRec = node.fRec;
+    }
 }
 
 babp::TaskHolder::TaskHolder(

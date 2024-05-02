@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <iostream>
 
 #include "types.hpp"
 #include "index_bound_set.hpp"
@@ -59,7 +60,8 @@ namespace core {
         Backend(babp::TaskHolder &&taskHolder);
         Backend(babp::TaskHolder const& taskHolder);
 
-        Vector_t solve();
+        Vector_t solve(std::ostream &output) const;
+        Vector_t solveAsync(std::ostream &output);
     };
 
     struct TreeNodeArguments {
