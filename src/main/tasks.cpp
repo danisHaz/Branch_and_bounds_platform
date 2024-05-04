@@ -8,6 +8,7 @@
 #include "tasks.hpp"
 #include "defines.hpp"
 #include "solution.hpp"
+#include "backend.hpp"
 
 std::function<int(std::vector<int> const&, int)> indexGenStraight() {
     return [](std::vector<int> const& params, int index) {
@@ -126,6 +127,119 @@ void solve(
     output << costFunc(solution) << '\n';
 }
 
+void solveAsync(
+    int dimensionSize,
+    int boundsSize,
+    Eigen::MatrixXd A,
+    Eigen::VectorXd b,
+    Eigen::VectorXd d,
+    Eigen::MatrixXd Q,
+    Eigen::VectorXd alpha,
+    Eigen::VectorXd beta,
+    std::function<int(std::vector<int> const&, int)> &&indexGenerator,
+    std::ostream &output = std::cout
+) {
+
+    PRINT(alpha); PRINT(beta);
+
+    Eigen::MatrixXd C = (-A * Q.inverse() * A.transpose()).eval();
+    Eigen::VectorXd p = (-(b + A * Q.inverse() * d)).eval();
+
+    auto derivativeFunc = [](
+        Eigen::VectorXd const& y,
+        Eigen::MatrixXd const& C,
+        Eigen::VectorXd const& p
+    ) {
+        return (C * y + p).eval();
+    };
+
+    auto originalSolutionFunc = [](
+        Eigen::VectorXd const& y,
+        Eigen::MatrixXd const& A,
+        Eigen::VectorXd const& d,
+        Eigen::MatrixXd const& Q
+    ) {
+        return (-Q.inverse() * (d + A.transpose() * y)).eval();
+    };
+
+    auto costFunc = [](
+        Eigen::VectorXd const& x,
+        Eigen::VectorXd const& d,
+        Eigen::MatrixXd const& Q
+    ) {
+        return (0.5 * (Q * x).dot(x) + d.dot(x));
+    };
+
+    auto coerceIn = [](
+        Eigen::VectorXd x,
+        Eigen::VectorXd const& alpha,
+        Eigen::VectorXd const& beta
+    ) {
+        for (int i = 0; i < x.size(); i++) {
+            x[i] = std::max(x[i], alpha[i]);
+            x[i] = std::min(x[i], beta[i]);
+        }
+        return x;
+    };
+
+    auto recalculateParams = [](
+        babp::core::Indices const& lowerBound,
+        babp::core::Indices const& upperBound,
+        Eigen::MatrixXd &A,
+        Eigen::VectorXd &b,
+        Eigen::VectorXd const& d,
+        Eigen::MatrixXd const& Q,
+        Eigen::VectorXd const& alpha,
+        Eigen::VectorXd const& beta,
+        Eigen::MatrixXd &C,
+        Eigen::VectorXd &p
+    ) {
+        PRINT("AAA");
+        PRINT(&A);
+        b.fill(0);
+        A.fill(0);
+        lowerBound.iterateOver([&](int step){
+            A(step, step) = -1;
+            b[step] = -alpha[step];
+        });
+
+        upperBound.iterateOver([&](int step) {
+            A(step, step) = 1;
+            b[step] = beta[step];
+        });
+
+        C = (-A * Q.inverse() * A.transpose()).eval();
+        p = (-(b + A * Q.inverse() * d)).eval();
+    };
+
+    babp::core::structural::IndicesGenerator generator {
+        boundsSize, std::move(indexGenerator)
+    };
+
+    babp::core::LowerBoundOfNode lowerBoundOfNode {
+        Q, b, alpha, beta
+    };
+
+    babp::TaskHolderAsync holder {
+        dimensionSize, boundsSize,
+        std::move(derivativeFunc),
+        std::move(originalSolutionFunc),
+        std::move(recalculateParams),
+        std::move(coerceIn),
+        std::move(costFunc),
+        std::move(generator),
+        std::move(lowerBoundOfNode)
+    };
+
+    babp::ArgumentsHolderAsync arguments {
+        A, b, d, Q, alpha, beta, C, p
+    };
+
+    auto solution = babp::solver::solve(std::move(holder), std::move(arguments), 8, output);
+    output << solution << "\n";
+    output << costFunc(solution, d, Q) << '\n';
+}
+
 void task1(int dimensionSize, int boundsSize) {
     Eigen::MatrixXd Q { Eigen::MatrixXd::Zero(dimensionSize, dimensionSize) };
     Eigen::VectorXd alpha; alpha.resize(dimensionSize);
@@ -145,7 +259,7 @@ void task1(int dimensionSize, int boundsSize) {
     Eigen::VectorXd b = Eigen::VectorXd::Zero(boundsSize);
     Eigen::MatrixXd A = Eigen::MatrixXd::Zero(boundsSize, dimensionSize);
 
-    solve(
+    solveAsync(
         dimensionSize,
         boundsSize,
         std::move(A),

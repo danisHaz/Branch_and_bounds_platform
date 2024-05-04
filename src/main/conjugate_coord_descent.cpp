@@ -123,12 +123,6 @@ babp::core::Vector_t babp::core::ConjugateCoordDescent::solveAlternative(
             1,
             [&partialSolution, &direction, &calculateDerivativeFunction](double x) {
                 auto vec = calculateDerivativeFunction(partialSolution + x * direction);
-                PRINT("conjigate descent alternative, y:");
-                PRINT(partialSolution);
-                PRINT("conjigate descent alternative, direction:");
-                PRINT(direction);
-                PRINT("conjigate descent alternative, lambdax:");
-                PRINT(x);
                 double nextX = 0;
                 for (int ind = 0; ind < direction.size(); ind++) {
                     if (direction[ind] == 0) {

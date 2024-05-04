@@ -40,6 +40,7 @@ set_target_properties(boost_context PROPERTIES
 
 add_executable(
     BaBP 
+    ${COMMON_SOURCES}
     src/main/platform.cpp
 )
 
@@ -51,10 +52,6 @@ target_include_directories(BaBP
 )
 
 target_link_libraries(BaBP boost_coroutine boost_context)
-
-# message(${BOOST_MAIN})
-
-# target_link_directories(BaBP ${Boost_LIBRARY_DIRS})
 
 target_compile_definitions(
     ${PROJECT_NAME}
